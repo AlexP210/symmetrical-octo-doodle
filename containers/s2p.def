@@ -1,0 +1,82 @@
+Bootstrap: docker
+From: nvidia/cuda:13.3.0-cudnn-runtime-ubuntu24.04
+
+%arguments
+    PROJECT_ROOT=.
+
+%files
+    {{ PROJECT_ROOT }}/requirements.txt /opt/requirements.txt
+
+%post
+    apt-get update && apt-get install -y \
+        python3 \
+        python3-pip \
+        python3-venv \
+        git \
+        libegl1 \
+        libgl1 \
+        libglib2.0-0t64 \
+        libvulkan1 \
+        vulkan-tools \
+        ffmpeg \
+        libglvnd-dev \
+    && rm -rf /var/lib/apt/lists/*
+    python3 -m venv /opt/venv
+    /opt/venv/bin/python3 -m pip install -r /opt/requirements.txt
+
+    # --- NVIDIA Vulkan/EGL fallback config for SAPIEN/ManiSkill ---
+    # SAPIEN checks these exact paths/names; the host's driver ships them
+    # under arch-suffixed names (nvidia_icd.x86_64.json) that SAPIEN won't
+    # find. These use bare .so names that --nv resolves via LD_LIBRARY_PATH.
+    mkdir -p /usr/share/vulkan/icd.d /usr/share/glvnd/egl_vendor.d /etc/vulkan/implicit_layer.d
+
+    cat > /usr/share/vulkan/icd.d/nvidia_icd.json << 'EOF'
+{
+    "file_format_version" : "1.0.0",
+    "ICD": {
+        "library_path": "libGLX_nvidia.so.0",
+        "api_version" : "1.2.155"
+    }
+}
+EOF
+
+    cat > /usr/share/glvnd/egl_vendor.d/10_nvidia.json << 'EOF'
+{
+    "file_format_version" : "1.0.0",
+    "ICD" : {
+        "library_path" : "libEGL_nvidia.so.0"
+    }
+}
+EOF
+
+    cat > /etc/vulkan/implicit_layer.d/nvidia_layers.json << 'EOF'
+{
+    "file_format_version" : "1.0.0",
+    "layer": {
+        "name": "VK_LAYER_NV_optimus",
+        "type": "INSTANCE",
+        "library_path": "libGLX_nvidia.so.0",
+        "api_version" : "1.2.155",
+        "implementation_version" : "1",
+        "description" : "NVIDIA Optimus layer",
+        "functions": {
+            "vkGetInstanceProcAddr": "vk_optimusGetInstanceProcAddr",
+            "vkGetDeviceProcAddr": "vk_optimusGetDeviceProcAddr"
+        },
+        "enable_environment": {
+            "__NV_PRIME_RENDER_OFFLOAD": "1"
+        },
+        "disable_environment": {
+            "DISABLE_LAYER_NV_OPTIMUS_1": ""
+        }
+    }
+}
+EOF
+    
+%environment
+    export PATH=/opt/venv/bin:$PATH
+    export VIRTUAL_ENV=/opt/venv
+    export MPLBACKEND=Agg
+    export PYTHONUNBUFFERED=1
+    export HYDRA_FULL_ERROR=1
+    export LD_LIBRARY_PATH=/usr/lib64/nvidia:$LD_LIBRARY_PATH

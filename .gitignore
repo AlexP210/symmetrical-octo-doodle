@@ -1,0 +1,10 @@
+# Apptainer files
+**.sif
+**.overlay
+**.overlay.new
+
+# wandb
+**/wandb
+
+# Python artifacts
+**/__pycache__

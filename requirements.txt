@@ -1,0 +1,45 @@
+--extra-index-url https://download.pytorch.org/whl/cu128
+absl-py==2.4.0
+calflops==0.3.2
+dm-env==1.6
+dm-tree==0.1.10
+dm_control==1.0.39
+gym==0.25.2
+gymnasium==1.3.0
+hydra-core==1.3.2
+ImageIO==2.37.3
+matplotlib==3.10.9
+moviepy==2.2.1
+mujoco==3.9.0
+omegaconf==2.3.0
+opencv-python-headless==4.13.0.92
+packaging==26.0
+pandas==3.0.3
+pathlib==1.0.1
+scikit-learn==1.9.0
+scikit-video==1.1.11
+scipy==1.17.1
+tensordict==0.11.0
+termcolor==3.3.0
+torch==2.10.0+cu128
+torchrl==0.6.0
+tqdm==4.68.2
+transformers==5.10.2
+wandb==0.27.2
+torchvision==0.25.0+cu128
+torchmetrics==1.9.0
+debugpy==1.8.21
+einops==0.8.2
+decord==0.6.0
+ftfy==6.3.1
+mani-skill>=3.0.0
+sapien>=3.0.0
+tensorboard==2.20.0
+# DINO-WM's PushT env (agents/dino_wm/dino_wm/env/pusht), wrapped by s2p.tasks.pusht_task:
+# pymunk is the physics, pygame the offscreen renderer, shapely the goal-coverage reward,
+# scikit-image only for the module-level `skimage.transform` import in pusht_env.py.
+pymunk==6.8.0
+pygame==2.6.1
+shapely==2.1.2
+scikit-image==0.25.2
+seaborn==0.13.2
